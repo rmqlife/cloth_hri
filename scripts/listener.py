@@ -43,10 +43,13 @@ def prepare():
 
 
 if __name__ == '__main__':
+	# initialize, set tt_motion to save the prev data
 	global tt_motion
 	tt_motion = np.array([])
 	prepare()
+	print tt_motion
 	try:
+		# add listener
 		listener()
 	except rospy.ROSInterruptException:
 		np.save('motion',tt_motion)
