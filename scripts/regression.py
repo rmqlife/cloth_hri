@@ -31,7 +31,7 @@ def load_model(data_name='data2_grid.npz'):
     from sklearn import linear_model
     model = linear_model.Lasso(alpha =.01)
 
-    inds = sorted(np.random.choice(1500, 200, replace=False))
+    inds = sorted(np.random.choice(1500, 300, replace=False))
     X_train = X[inds]
     y_train = y[inds]
     model.fit(X_train, y_train)

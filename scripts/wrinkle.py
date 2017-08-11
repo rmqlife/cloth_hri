@@ -18,7 +18,7 @@ def get_fg(img):
 def mk(s):#morph kernel
     return np.ones((s,s),np.uint8)
 
-def gabor_feat(img, num_theta = 4, show_fg=False,show_step=False):
+def gabor_feat(img, num_theta = 4, grid = 80, show_fg=False,show_step=False):
     img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
     fg = get_fg(img)
     shrink_fg = cv2.erode(fg, mk(15), iterations = 2)
@@ -36,7 +36,6 @@ def gabor_feat(img, num_theta = 4, show_fg=False,show_step=False):
     count = 0
     
     rows, cols = gray.shape
-    grid = 80
 
     hist = []
     for i in range(num_theta):
