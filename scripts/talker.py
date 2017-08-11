@@ -39,11 +39,10 @@ if __name__ == '__main__':
 	data = np.load('data2_grid.npz')
 	pos = data['pos']
 	feat = data['feat']
+
 	init_pos = pos[1]
-	
 	reach_init = False
 	target_feat = feat[1]
-
 	global have_current_pos; have_current_pos = False
 	global have_im; have_im = False
 	global current_pos,im
