@@ -6,13 +6,13 @@ from std_msgs.msg import String
 from std_msgs.msg import Float64MultiArray
 
 def talker():
-    pub = rospy.Publisher('chatter', String, queue_size=10)
+    pub = rospy.Publisher('/yumi/ikSloverVel_controller/command', Float64MultiArray, queue_size=10)
     rospy.init_node('talker', anonymous=True)
     rate = rospy.Rate(10) # 10hz
     while not rospy.is_shutdown():
-        hello_str = "hello world %s" % rospy.get_time()
-        rospy.loginfo(hello_str)
-        pub.publish(hello_str)
+        vel = [0.01,0.01,0.01,0.01,0.01,0.01]
+        print vel
+        pub.publish(vel)
         rate.sleep()
 
 if __name__ == '__main__':
