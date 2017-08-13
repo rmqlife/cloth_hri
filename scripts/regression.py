@@ -29,7 +29,7 @@ def load_model(data_name):
 
     # begin training
     from sklearn import linear_model
-    model = linear_model.Lasso(alpha =.1)
+    model = linear_model.Lasso(alpha =1)
 
     inds = sorted(np.random.choice(len(X), 500, replace=False))
     X_train = X[inds]

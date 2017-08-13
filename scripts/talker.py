@@ -47,7 +47,7 @@ def validate_pos(current_pos,pos):
 
 if __name__ == '__main__':
 
-	data_name = 'data2.npz'
+	data_name = '/home/bacon/catkin_ws/src/cloth_hri/deformable/cloth_0813/1135/data2_float_40_bg.npz'
 	# load data, to set the current position to target position  
 	data = np.load(data_name)
 	pos = data['pos']
@@ -85,7 +85,6 @@ if __name__ == '__main__':
 			else: # have target_feat
 				avg, hist = wrinkle.gabor_feat(im,num_theta=8)
 				bridge = CvBridge()
-				avg = 255*avg
 				pub_im.publish(bridge.cv2_to_imgmsg(avg,'mono8'))
 				hist = np.array(target_feat) - np.array(hist)
 				motion = model.predict(hist.reshape((1,-1))).ravel()
