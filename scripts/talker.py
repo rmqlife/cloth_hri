@@ -19,24 +19,37 @@ def process_pos(msg):
 	global have_current_pos; have_current_pos = True
 	global current_pos; current_pos = np.array(msg.data)
 
-def predict(im, target_feat):
-	avg, hist = wrinkle.gabor_feat(im,num_theta=8)
-	hist = hist.reshape((1,-1))
-	hist = target_feat - hist
-	global model; motion = model.predict(hist)
-	motion = motion.ravel()
+
+def validate_motion(motion):
+	print 'validate', max(motion)
+	toleration = 0.04
+	if max(motion)>toleration:
+		print "bad"
+		motion = np.zeros(6)
 	return motion
 
-def prepare(target_eat):
-	global model
-	model = regression.load_model()
-	# load an image to process a simple test
-	im = cv2.imread('cloth.jpg')
-	print 'prepare, predict(im):', predict(im, target_feat)
+
+def validate_pos(current_pos,pos):
+    upper = np.zeros(6)
+    lower = np.zeros(6)
+    for i in range(pos.shape[1]):
+        upper[i] = max(pos[:,i])+0.05
+        lower[i] = min(pos[:,i])-0.05
+    for i in range(len(current_pos)):
+        if current_pos[i]<lower[i]:
+            print 'lower',lower
+            return False
+        if current_pos[i]>upper[i]:
+            print 'upper', upper
+            return False
+    return True
+	
 
 if __name__ == '__main__':
+
+	data_name = 'data2.npz'
 	# load data, to set the current position to target position  
-	data = np.load('data2_grid.npz')
+	data = np.load(data_name)
 	pos = data['pos']
 	feat = data['feat']
 
@@ -51,7 +64,7 @@ if __name__ == '__main__':
 	tt_motion = np.array([])
 	
 	# load the regression model
-	model = regression.load_model()
+	model = regression.load_model(data_name)
 	# load an image for a simple test
 	im = cv2.imread('cloth.jpg')
 	avg, hist = wrinkle.gabor_feat(im,num_theta=8)
@@ -69,34 +82,41 @@ if __name__ == '__main__':
 	rospy.init_node('talker', anonymous=True)
 	rate = rospy.Rate(10) # 10hz
 	
-	online_move = False
-	
+	online_move = True
+
+	vel = Float64MultiArray()
 	while not rospy.is_shutdown():
-		vel = Float64MultiArray()
+
 		# test the state machine
 		# print "have_pos:", have_current_pos, "reach_init:", reach_init, "have_im:", have_im
 		if not reach_init and have_current_pos:
-			vel.data = 0.1*(init_pos-current_pos)
-			print "reach init vel",vel.data
-			if max(vel.data)<0.001:
+			motion = 0.1*(init_pos-current_pos)
+			motion = validate_motion(motion)
+			print "reaching init vel",motion
+			if max(motion)<0.001:
 				reach_init=True
 				print "reach init state"
-				vel.data = np.zeros(6)
-			print vel.data, init_pos,current_pos
+				motion = np.zeros(6)
+			vel.data = motion
 			pub.publish(vel)
 			have_current_pos = False
+		elif not validate_pos(current_pos,pos):
+			print "invalid position", current_pos
+			vel.data = np.zeros(6)
+			pub.publish(vel)
 
-		elif reach_init and have_im and online_move:
+		elif reach_init and have_im and online_move: 
 			avg, hist = wrinkle.gabor_feat(im,num_theta=8)
 			hist = np.array(target_feat - hist)
 			motion = model.predict(hist.reshape((1,-1))).ravel()
-			tt_motion = np.vstack((tt_motion,motion)) if tt_motion.size else motion
+			motion = 0.1*motion
+			motion = validate_motion(motion)
 			vel.data = motion
 			pub.publish(vel)
 			print "motion", motion
 			have_im = False
-		else:
+		else: 
 			print 'idle state'
-			vel.data = np.zeros(6)
+			#vel.data = np.zeros(6)
 			pub.publish(vel)
 		rate.sleep()
