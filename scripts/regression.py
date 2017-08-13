@@ -29,9 +29,9 @@ def load_model(data_name):
 
     # begin training
     from sklearn import linear_model
-    model = linear_model.Lasso(alpha =.01)
+    model = linear_model.Lasso(alpha =.1)
 
-    inds = sorted(np.random.choice(len(X), 300, replace=False))
+    inds = sorted(np.random.choice(len(X), 500, replace=False))
     X_train = X[inds]
     y_train = y[inds]
     model.fit(X_train, y_train)

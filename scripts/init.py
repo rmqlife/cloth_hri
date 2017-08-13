@@ -14,10 +14,9 @@ def process_pos(msg):
 	global current_pos; current_pos = np.array(msg.data)
 
 def validate_motion(motion):
-	print 'validate', max(motion)
 	toleration = 0.04
-	if max(motion)>toleration:
-		motion = motion * toleration/max(motion)
+	if max(abs(motion))>toleration:
+		motion = motion * toleration/max(abs(motion))
 	return motion
 
 if __name__ == '__main__':
@@ -44,12 +43,13 @@ if __name__ == '__main__':
 	vel = Float64MultiArray()
 	while not rospy.is_shutdown():
 		if not reach_init and have_current_pos:
-			if max(init_pos-current_pos)<0.01:
+			print max(abs(init_pos-current_pos))
+			if max(abs(init_pos-current_pos))<0.01:
 				reach_init=True
 				print "reach init state"
 				motion = np.zeros(6)
 			else:
-				motion = 0.1*(init_pos-current_pos)
+				motion = (init_pos-current_pos)
 				motion = validate_motion(motion)
 				print "reaching init vel",motion
 			vel.data = motion
