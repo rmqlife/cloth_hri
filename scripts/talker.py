@@ -68,6 +68,9 @@ if __name__ == '__main__':
 
 	rospy.init_node('talker', anonymous=True)
 	rate = rospy.Rate(10) # 10hz
+	
+	online_move = False
+	
 	while not rospy.is_shutdown():
 		vel = Float64MultiArray()
 		# test the state machine
@@ -75,14 +78,15 @@ if __name__ == '__main__':
 		if not reach_init and have_current_pos:
 			vel.data = 0.1*(init_pos-current_pos)
 			print "reach init vel",vel.data
-			if max(vel.data)<0.01:
+			if max(vel.data)<0.001:
 				reach_init=True
 				print "reach init state"
+				vel.data = np.zeros(6)
 			print vel.data, init_pos,current_pos
 			pub.publish(vel)
 			have_current_pos = False
 
-		elif reach_init and have_im:
+		elif reach_init and have_im and online_move:
 			avg, hist = wrinkle.gabor_feat(im,num_theta=8)
 			hist = np.array(target_feat - hist)
 			motion = model.predict(hist.reshape((1,-1))).ravel()
@@ -91,4 +95,8 @@ if __name__ == '__main__':
 			pub.publish(vel)
 			print "motion", motion
 			have_im = False
+		else:
+			print 'idle state'
+			vel.data = np.zeros(6)
+			pub.publish(vel)
 		rate.sleep()
