@@ -47,7 +47,7 @@ def validate_pos(current_pos,pos):
 
 if __name__ == '__main__':
 
-	data_name = '/home/bacon/catkin_ws/src/cloth_hri/deformable/cloth_0813/1135/data2_float_40_bg.npz'
+	data_name = 'data_0814-1509.npz'
 	# load data, to set the current position to target position  
 	data = np.load(data_name)
 	pos = data['pos']
@@ -61,8 +61,8 @@ if __name__ == '__main__':
 	pub = rospy.Publisher('/yumi/ikSloverVel_controller/command', Float64MultiArray, queue_size=10)
 	pub_im = rospy.Publisher('/cloth/wrinkle',Image,queue_size=10)
 
-	rospy.Subscriber('/yumi/ikSloverVel_controller/ee_cart_position', Float64MultiArray , process_pos)
-	rospy.Subscriber('/camera/image/rgb_611205001943',Image, process_rgb)
+	rospy.Subscriber('/yumi/ikSloverVel_controller/ee_cart_position', Float64MultiArray , process_pos, queue_size = 2)
+	rospy.Subscriber('/camera/image/rgb_611205001943',Image, process_rgb, queue_size=2)
 	rospy.sleep(1)	
 
 	rospy.init_node('talker', anonymous=True)
@@ -79,16 +79,16 @@ if __name__ == '__main__':
 		elif have_im: 
 			have_im = False
 			if not have_target:
-				avg, target_feat = wrinkle.gabor_feat(im,num_theta=8)
+				avg, target_feat = wrinkle.gabor_feat(im,num_theta=8,grid=80)
 				print target_feat
 				have_target= True
 			else: # have target_feat
-				avg, hist = wrinkle.gabor_feat(im,num_theta=8)
+				avg, hist = wrinkle.gabor_feat(im,num_theta=8,grid=80)
 				bridge = CvBridge()
 				pub_im.publish(bridge.cv2_to_imgmsg(avg,'mono8'))
 				hist = np.array(target_feat) - np.array(hist)
 				motion = model.predict(hist.reshape((1,-1))).ravel()
-				motion = 0.1*motion
+				motion = 0.3*motion
 				motion = validate_motion(motion)
 				vel.data = motion
 				print "motion", motion
