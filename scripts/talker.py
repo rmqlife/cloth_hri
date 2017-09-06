@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # Software License Agreement (BSD License)
+import sys
 import rospy
 from std_msgs.msg import String, Float64MultiArray
 from sensor_msgs.msg import Image
@@ -47,7 +48,7 @@ def validate_pos(current_pos,pos):
 
 if __name__ == '__main__':
 
-	data_name = 'data_0814-1509.npz'
+	data_name = sys.argv[1]
 	# load data, to set the current position to target position  
 	data = np.load(data_name)
 	pos = data['pos']
