@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Software License Agreement (BSD License)
+# This script is to record the training data into a file
 import rospy
 from std_msgs.msg import String, Float64MultiArray
 from sensor_msgs.msg import Image
@@ -52,8 +52,3 @@ if __name__ == '__main__':
 			time_str = time.strftime("%m%d-%H%M")
 			np.savez('data_'+time_str+'.npz',pos=pos, feat=feat)
 			break
-				
-
-    		
-
-

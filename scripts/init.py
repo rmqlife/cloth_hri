@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-# Software License Agreement (BSD License)
+# This script is used to initialize the position of the gripper to a fixed position.
+
 import rospy
 from std_msgs.msg import String, Float64MultiArray
 from sensor_msgs.msg import Image
