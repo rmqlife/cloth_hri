@@ -7,7 +7,7 @@ from sensor_msgs.msg import Image
 import numpy as np
 from cv_bridge import CvBridge
 import cv2
-import wrinkle
+import wrinkle2
 import regression
 
 
@@ -60,7 +60,6 @@ if __name__ == '__main__':
 	model = regression.load_model(data_name)
 
 	pub = rospy.Publisher('/yumi/ikSloverVel_controller/command', Float64MultiArray, queue_size=10)
-	pub_im = rospy.Publisher('/cloth/wrinkle',Image,queue_size=10)
 
 	rospy.Subscriber('/yumi/ikSloverVel_controller/ee_cart_position', Float64MultiArray , process_pos, queue_size = 2)
 	rospy.Subscriber('/camera/image/rgb_611205001943',Image, process_rgb, queue_size=2)
@@ -80,13 +79,11 @@ if __name__ == '__main__':
 		elif have_im: 
 			have_im = False
 			if not have_target:
-				avg, target_feat = wrinkle.gabor_feat(im,num_theta=8,grid=80)
+				target_feat = wrinkle2.xhist(im)
 				print target_feat
 				have_target= True
 			else: # have target_feat
-				avg, hist = wrinkle.gabor_feat(im,num_theta=8,grid=80)
-				bridge = CvBridge()
-				pub_im.publish(bridge.cv2_to_imgmsg(avg,'mono8'))
+				hist = wrinkle2.xhist(im)
 				hist = np.array(target_feat) - np.array(hist)
 				motion = model.predict(hist.reshape((1,-1))).ravel()
 				motion = 0.3*motion

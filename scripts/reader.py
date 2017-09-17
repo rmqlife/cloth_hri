@@ -6,7 +6,7 @@ from sensor_msgs.msg import Image
 import numpy as np
 from cv_bridge import CvBridge
 import cv2
-import wrinkle
+import wrinkle2
 import regression
 import time
 
@@ -40,7 +40,7 @@ if __name__ == '__main__':
 			if have_current_pos and have_im:
 				print 'time', time.time()-start_time
 				print current_pos
-				_, hist = wrinkle.gabor_feat(im,num_theta=8,grid=80)
+				_, hist = wrinkle2.xhist(im)
 				hist = np.array(hist)
 				pos = np.vstack((pos,current_pos)) if pos.size else current_pos
 				feat = np.vstack((feat,hist)) if feat.size else hist
