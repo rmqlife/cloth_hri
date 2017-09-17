@@ -25,6 +25,6 @@ def load_model(data_name):
 
     # begin training
     from sklearn import linear_model
-    model = linear_model.Lasso(alpha = 1)
+    model = linear_model.Lasso(alpha = 0.00001)
     model.fit(X_train, y_train)
     return model
