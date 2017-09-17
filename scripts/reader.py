@@ -40,7 +40,7 @@ if __name__ == '__main__':
 			if have_current_pos and have_im:
 				print 'time', time.time()-start_time
 				print current_pos
-				_, hist = wrinkle2.xhist(im)
+				hist = wrinkle2.xhist(im)
 				hist = np.array(hist)
 				pos = np.vstack((pos,current_pos)) if pos.size else current_pos
 				feat = np.vstack((feat,hist)) if feat.size else hist
