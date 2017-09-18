@@ -26,7 +26,7 @@ def validate_motion(motion):
 	toleration = 0.04
 	if max(abs(motion))>toleration:
 		print "bad"
-		motion = np.zeros(6)
+		motion = motion*toleration/max(abs(motion))
 	return motion
 
 
