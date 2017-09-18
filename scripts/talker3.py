@@ -49,16 +49,18 @@ def validate_pos(current_pos,pos):
 if __name__ == '__main__':
 
 	data_name = sys.argv[1]
-	# load data, to set the current position to target position  
 	data = np.load(data_name)
 	pos = data['pos']
 	feat = data['feat']
+	
+	target_feat = feat[0,:]
 	global have_current_pos; have_current_pos = False
 	global have_im; have_im = False
 	global current_pos,im
 	# load the regression model
 	model = regression.load_model_data(pos, feat, num_samples=4, alpha=0.000001)
-
+	goals = regression.find_goals(pos,1,10)
+	
 	pub = rospy.Publisher('/yumi/ikSloverVel_controller/command', Float64MultiArray, queue_size=10)
 
 	rospy.Subscriber('/yumi/ikSloverVel_controller/ee_cart_position', Float64MultiArray , process_pos, queue_size = 2)
@@ -70,27 +72,34 @@ if __name__ == '__main__':
 	
 	vel = Float64MultiArray()
 	vel.data = np.zeros(6)
-	have_target = False
 	while not rospy.is_shutdown():
 		if not validate_pos(current_pos,pos):
 			print "invalid position", current_pos
 			vel.data = np.zeros(6)
 			pub.publish(vel)
+		elif len(goals)==0:
+			print "achived"
+			vel.data = np.zeros(6)
+			pub.publish(vel)
 		elif have_im: 
 			have_im = False
-			if not have_target:
-				target_feat = wrinkle2.xhist(im)
-				print target_feat
-				have_target= True
-			else: # have target_feat
-				hist = wrinkle2.xhist(im)
-				hist = np.array(target_feat) - np.array(hist)
-				motion = model.predict(hist.reshape((1,-1))).ravel()
-				motion = 0.3*motion
-				motion = validate_motion(motion)
-				vel.data = motion
-				print "motion", motion
-				pub.publish(vel)
+			# have target_feat
+			hist = wrinkle2.xhist(im)
+
+			goal = goals[0]
+			target_feat = feat[goal,:]
+			hist = np.array(target_feat) - np.array(hist)
+			motion = model.predict(hist.reshape((1,-1))).ravel()
+			
+			# reached a subgoal
+			if regression.dist2(motion)<5e-2:
+				goals.pop(0)
+			motion = 0.3*motion
+			motion = validate_motion(motion)
+			vel.data = motion
+			print "motion", motion
+			print "goals", goals
+			pub.publish(vel)
 
 		else: 
 			print 'idle state'

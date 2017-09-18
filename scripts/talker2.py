@@ -26,7 +26,7 @@ def validate_motion(motion):
 	toleration = 0.04
 	if max(abs(motion))>toleration:
 		print "bad"
-		motion = np.zeros(6)
+		motion = motion*toleration/max(abs(motion))
 	return motion
 
 
@@ -58,7 +58,7 @@ if __name__ == '__main__':
 	global have_im; have_im = False
 	global current_pos,im
 	# load the regression model
-	model = regression.load_model(data_name)
+	model = regression.load_model_data(pos, feat, num_samples=4, alpha=0.000001)
 
 	pub = rospy.Publisher('/yumi/ikSloverVel_controller/command', Float64MultiArray, queue_size=10)
 
